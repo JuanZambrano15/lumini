@@ -1,36 +1,84 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Lumini
 
-## Getting Started
+Lumini es una plataforma educativa online para niños de 4 a 14 años, diseñada para potenciar el aprendizaje a través de actividades, juegos y seguimiento parental. El proyecto está construido con [Next.js](https://nextjs.org/), [React](https://react.dev/), [Firebase](https://firebase.google.com/), y utiliza [Tailwind CSS](https://tailwindcss.com/) para los estilos.
 
-First, run the development server:
+## Características
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+- Registro e inicio de sesión de usuarios (padres).
+- Gestión de perfiles de niños/as (hasta 3 por cuenta).
+- Selección de avatar personalizado para cada niño/a.
+- Actividades educativas y juegos interactivos.
+- Panel de control para padres con acceso protegido por contraseña.
+- Integración con Firebase para autenticación y almacenamiento de datos.
+
+## Estructura del Proyecto
+
+```
+src/
+  app/                # Páginas principales (Next.js App Router)
+  components/         # Componentes reutilizables (formularios, menús, etc.)
+  hooks/              # Custom React hooks
+  lib/                # Lógica de negocio y servicios (Firebase, auth, etc.)
+public/               # Imágenes y recursos estáticos
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Instalación
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+1. **Clona el repositorio:**
+   ```sh
+   git clone https://github.com/tu-usuario/lumini.git
+   cd lumini
+   ```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+2. **Instala las dependencias:**
+   ```sh
+   npm install
+   # o
+   yarn install
+   ```
 
-## Learn More
+3. **Configura las variables de entorno:**
+   - Crea un archivo `.env.local` en la raíz con tus credenciales de Firebase:
+     ```
+     NEXT_PUBLIC_FIREBASE_API_KEY=...
+     NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=...
+     NEXT_PUBLIC_FIREBASE_PROJECT_ID=...
+     NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=...
+     NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=...
+     NEXT_PUBLIC_FIREBASE_APP_ID=...
+     NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID=...
+     ```
 
-To learn more about Next.js, take a look at the following resources:
+4. **Inicia el servidor de desarrollo:**
+   ```sh
+   npm run dev
+   # o
+   yarn dev
+   ```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+   Accede a [http://localhost:3000](http://localhost:3000) en tu navegador.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Scripts útiles
 
-## Deploy on Vercel
+- `npm run dev` – Inicia el servidor de desarrollo.
+- `npm run build` – Compila la aplicación para producción.
+- `npm run start` – Inicia la aplicación en modo producción.
+- `npm run lint` – Ejecuta el linter.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Tecnologías principales
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- [Next.js](https://nextjs.org/) (App Router)
+- [React](https://react.dev/)
+- [Firebase](https://firebase.google.com/) (Auth, Firestore, Storage)
+- [Tailwind CSS](https://tailwindcss.com/)
+- [TypeScript](https://www.typescriptlang.org/)
+
+
+
+---
+
+Desarrollado con ❤️ por el equipo de Lumini.
+
+## Autores
+- Nicoll Sofia Arevalo Caballero (192316)
+- Juan José Zambrano Manzano (192327)
