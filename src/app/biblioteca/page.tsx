@@ -3,63 +3,70 @@
 
 import React, { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { useUser } from '../../../src/components/UserProvider'; // Asegúrate de que la ruta a UserProvider.tsx sea correcta
+import { useUser } from '../../../src/components/UserProvider';
 import {
-    logoutUser, 
-    getUserChildren,
+    logoutUser,
     getUserData,
     createChildProfile,
     getChildrenProfiles,
     ChildProfile,
-    updateChildProfile, // Importar la función de actualización
-    deleteChildProfile, // Importar la función de eliminación
-} from '../../../src/lib/authService'; // Asegúrate de que la ruta a authService.ts sea correcta
+    updateChildProfile,
+    deleteChildProfile,
+} from '../../../src/lib/authService';
 import Image from 'next/image';
 import comentarios from "../../../public/biblioteca/comentarios.svg";
 import logout from "../../../public/biblioteca/logout.svg";
 import Link from 'next/link';
 import pencil from "../../../public/biblioteca/pencil.svg";
-import { FieldValue } from 'firebase/firestore';
-import trash from "../../../public/biblioteca/trash.svg"
-import login from "../../../public/login_register/login.png"
-import plus from "../../../public/biblioteca/añadir.svg"
+import trash from "../../../public/biblioteca/trash.svg";
+import plus from "../../../public/biblioteca/añadir.svg";
+
+import { availableAvatars, getAvatarById, getDefaultAvatarIdBySexo } from '../../lib/avatars';
 
 const MAX_CHILDREN_PROFILES = 3;
 
-// URLs de los avatares predefinidos
-const AVATAR_MALE = '/biblioteca/hombre.jpg'; // Asegúrate de tener esta imagen en public/biblioteca
-const AVATAR_FEMALE = '/biblioteca/mujer.jpg'; // Asegúrate de tener esta imagen en public/biblioteca
-const AVATAR_NON_BINARY = '/biblioteca/no-binario.jpg'; // Asegúrate de tener esta imagen en public/biblioteca
-
 const BibliotecaPage = () => {
     const router = useRouter();
-    const { user, loading, setActiveChildProfile, activeChildProfile } = useUser();
+    const { user, loading, setActiveChildProfile, activeChildProfile } = useUser(); // <-- activeChildProfile es importante aquí
     const [userData, setUserData] = useState<{ email: string; name?: string } | null>(null);
     const [childrenProfiles, setChildrenProfiles] = useState<ChildProfile[]>([]);
     const [showAddChildModal, setShowAddChildModal] = useState(false);
 
-    // Estados para los campos del formulario de AÑADIR niño
     const [newChildName, setNewChildName] = useState('');
-    const [newChildSexo, setNewChildSexo] = useState<'hombre' | 'mujer' | 'prefiero no decirlo'>('prefiero no decirlo'); // Valor por defecto
-    const [newChildTipoLimitacion, setNewChildTipoLimitacion] = useState<'tdha'>('tdha'); // Valor por defecto, por ahora solo TDHA
+    const [newChildSexo, setNewChildSexo] = useState<'hombre' | 'mujer' | 'prefiero no decirlo'>('prefiero no decirlo');
+    const [newChildTipoLimitacion, setNewChildTipoLimitacion] = useState<'tdha'>('tdha');
+    const [newChildAvatarId, setNewChildAvatarId] = useState<number>(getDefaultAvatarIdBySexo('prefiero no decirlo'));
 
-    // Estados para el modal de EDICIÓN de niño
     const [showEditChildModal, setShowEditChildModal] = useState(false);
-    const [editingChild, setEditingChild] = useState<ChildProfile | null>(null); // El perfil de niño que se está editando
+    const [editingChild, setEditingChild] = useState<ChildProfile | null>(null);
     const [editChildName, setEditChildName] = useState('');
     const [editChildSexo, setEditChildSexo] = useState<'hombre' | 'mujer' | 'prefiero no decirlo'>('prefiero no decirlo');
     const [editChildTipoLimitacion, setEditChildTipoLimitacion] = useState<'tdha'>('tdha');
+    const [editChildAvatarId, setEditChildAvatarId] = useState<number | undefined>(undefined);
 
-    // Usamos useCallback para memoizar la función de carga de datos
     const fetchData = useCallback(async () => {
         if (user) {
-            console.log("Fetching user data and children profiles...");
+            console.log("BibliotecaPage: Fetching user data and children profiles...");
             const parentData = await getUserData(user.uid);
             setUserData(parentData);
             const children = await getChildrenProfiles(user.uid);
             setChildrenProfiles(children);
+
+            // IMPORTANTE: Después de cargar los perfiles, si no hay un activeChildProfile ya establecido
+            // por UserProvider, o si el que está activo no se encuentra en la nueva lista,
+            // podrías querer establecer uno aquí. SIN EMBARGO, el UserProvider ya maneja esto.
+            // La única vez que debes llamar setActiveChildProfile aquí es cuando el usuario HACE CLIC en un perfil.
+            // Evita establecer un perfil por defecto aquí si UserProvider ya lo hace.
+
+            // Verificar si el activeChildProfile actual sigue siendo válido en la lista cargada
+            if (activeChildProfile && !children.find(c => c.id === activeChildProfile.id)) {
+                console.log("BibliotecaPage: Active child profile from UserProvider not found in fetched list. Clearing or re-selecting.");
+                // Opcional: Si el perfil activo ya no existe (fue eliminado, por ejemplo),
+                // UserProvider debería manejarlo al no encontrarlo, o aquí lo limpiamos.
+                setActiveChildProfile(null); // Esto puede hacer que UserProvider seleccione uno nuevo.
+            }
         }
-    }, [user]); // Dependencia: solo se crea una nueva función si 'user' cambia
+    }, [user, activeChildProfile, setActiveChildProfile]); // Añadir activeChildProfile a las dependencias
 
     useEffect(() => {
         if (!loading && !user) {
@@ -67,75 +74,57 @@ const BibliotecaPage = () => {
         }
 
         if (!loading && user) {
-            fetchData(); // Llama a la función de carga
+            fetchData();
         }
-    }, [user, loading, router, fetchData]); // Dependencias: user, loading, router, fetchData
+    }, [user, loading, router, fetchData]);
 
-    const handleChildSelect = (child: ChildProfile) => {
-        console.log("Setting active child profile:", child);
-        setActiveChildProfile(child); // ¡AQUÍ ES DONDE DEBE OCURRIR!
-        router.push('/parent-web'); // Redirige a la web de padres o a la siguiente página
-    };
-    
+    useEffect(() => {
+        setNewChildAvatarId(getDefaultAvatarIdBySexo(newChildSexo));
+    }, [newChildSexo]);
+
+    useEffect(() => {
+        if (showEditChildModal && editingChild) {
+            setEditChildName(editingChild.name); // Asegurar que el nombre también se cargue
+            setEditChildSexo(editingChild.sexo);
+            setEditChildTipoLimitacion(editingChild.tipoLimitacion);
+            setEditChildAvatarId(editingChild.avatarId || getDefaultAvatarIdBySexo(editingChild.sexo));
+        }
+    }, [showEditChildModal, editingChild]);
+
+
     const handleLogout = async () => {
         try {
             await logoutUser();
+            setActiveChildProfile(null); // Limpiar el perfil activo al desloguearse
+            localStorage.removeItem('activeChildProfile'); // Asegurarse de limpiar localStorage
             router.push('/login');
         } catch (error) {
             console.error('Error al cerrar sesión:', error);
         }
     };
 
-    const handleSelectChild = (child: ChildProfile) => {
-        setActiveChildProfile(child); // <-- Aquí estableces el perfil activo
-        // Opcional: Redirigir a la página de padres después de seleccionar
-        router.push('/parent-web');
-    };
-
     const handleAddChild = async () => {
-        if (!user) {
-            alert('Debes estar autenticado para crear un perfil de niño.');
-            return;
-        }
-        if (childrenProfiles.length >= MAX_CHILDREN_PROFILES) {
-            alert(`No puedes crear más de ${MAX_CHILDREN_PROFILES} perfiles de niños.`);
-            return;
-        }
-        if (!newChildName.trim()) {
-            alert('Por favor, ingresa el nombre del niño.');
-            return;
-        }
-        let avatarToUse: string;
-            switch (newChildSexo) {
-            case 'mujer':
-                avatarToUse = AVATAR_FEMALE;
-                break;
-            case 'hombre':
-                avatarToUse = AVATAR_MALE;
-                break;
-                case 'prefiero no decirlo':
-            avatarToUse = AVATAR_NON_BINARY;
-            break;
-            default:
-            avatarToUse = AVATAR_NON_BINARY; // O un avatar por defecto general
-        }
-
+        // ... (Tu lógica existente para añadir niño) ...
         try {
-            
-            
             const newProfileData: Omit<ChildProfile, 'id'> = {
                 name: newChildName.trim(),
-                avatarUrl: avatarToUse,
-                sexo: newChildSexo, // Incluye el sexo
-                tipoLimitacion: newChildTipoLimitacion, // Incluye la limitación
+                sexo: newChildSexo,
+                tipoLimitacion: newChildTipoLimitacion,
+                avatarId: newChildAvatarId,
             };
 
-            await createChildProfile(user.uid, newProfileData); // No necesitamos el retorno aquí, fetchData lo actualizará
-            
-            // Resetear los estados del formulario y cerrar el modal
+            const createdChild = await createChildProfile(user!.uid, newProfileData); // El servicio devuelve el perfil con ID
+
+            // Después de crear un nuevo perfil, si es el primero o si quieres que sea el activo
+            if (!activeChildProfile || childrenProfiles.length === 0) {
+                 setActiveChildProfile(createdChild); // Establecer el nuevo perfil como activo
+                 console.log("BibliotecaPage: New child created and set as active.", createdChild);
+            }
+
             setNewChildName('');
-            setNewChildSexo('prefiero no decirlo'); // Resetear a valor por defecto
-            setNewChildTipoLimitacion('tdha'); // Resetear a valor por defecto
+            setNewChildSexo('prefiero no decirlo');
+            setNewChildTipoLimitacion('tdha');
+            setNewChildAvatarId(getDefaultAvatarIdBySexo('prefiero no decirlo'));
             setShowAddChildModal(false);
             await fetchData(); // Recargar todos los perfiles después de añadir uno nuevo
         } catch (error) {
@@ -144,57 +133,40 @@ const BibliotecaPage = () => {
         }
     };
 
-    // --- Funciones para Edición y Eliminación ---
-
     const handleEditClick = (child: ChildProfile) => {
-        setEditingChild(child); // Establece el niño que se va a editar
+        setEditingChild(child);
         setEditChildName(child.name);
         setEditChildSexo(child.sexo);
         setEditChildTipoLimitacion(child.tipoLimitacion);
-        setShowEditChildModal(true); // Abre el modal de edición
+        setEditChildAvatarId(child.avatarId || getDefaultAvatarIdBySexo(child.sexo));
+        setShowEditChildModal(true);
     };
 
     const handleUpdateChild = async () => {
-        if (!user || !editingChild || !editingChild.id) {
-            alert('No se pudo actualizar el perfil del niño. Faltan datos.');
-            return;
-        }
-        if (!editChildName.trim()) {
-            alert('El nombre del niño no puede estar vacío.');
-            return;
-        }
-        let updatedAvatarUrl: string;
-        switch (editChildSexo) {
-            case 'mujer':
-                updatedAvatarUrl = AVATAR_FEMALE;
-                break;
-            case 'hombre':
-                updatedAvatarUrl = AVATAR_MALE;
-                break;
-            case 'prefiero no decirlo':
-                 updatedAvatarUrl = AVATAR_NON_BINARY;
-                break;
-            default:
-                updatedAvatarUrl = AVATAR_NON_BINARY; // O un avatar por defecto general
-        }
-
+        // ... (Tu lógica existente para actualizar niño) ...
         try {
             const updatedData: Partial<ChildProfile> = {
                 name: editChildName.trim(),
-                avatarUrl: updatedAvatarUrl,
                 sexo: editChildSexo,
                 tipoLimitacion: editChildTipoLimitacion,
+                avatarId: editChildAvatarId,
             };
 
-            await updateChildProfile(user.uid, editingChild.id, updatedData);
-            
-            // Resetear estados del formulario de edición y cerrar el modal
+            await updateChildProfile(user!.uid, editingChild!.id!, updatedData);
+
+            // Si el perfil que se acaba de actualizar es el activo, actualízalo en el UserProvider también
+            if (activeChildProfile && activeChildProfile.id === editingChild!.id) {
+                setActiveChildProfile({ ...activeChildProfile, ...updatedData });
+                console.log("BibliotecaPage: Updated active child profile in UserProvider.");
+            }
+
             setEditingChild(null);
             setEditChildName('');
             setEditChildSexo('prefiero no decirlo');
             setEditChildTipoLimitacion('tdha');
+            setEditChildAvatarId(undefined);
             setShowEditChildModal(false);
-            await fetchData(); // Recargar todos los perfiles para reflejar el cambio
+            await fetchData();
         } catch (error) {
             console.error('Error updating child profile:', error);
             alert('Error al actualizar el perfil del niño. Consulta la consola.');
@@ -202,22 +174,20 @@ const BibliotecaPage = () => {
     };
 
     const handleDeleteChild = async (childId: string) => {
-        if (!user) {
-            alert('Debes estar autenticado para eliminar un perfil.');
-            return;
-        }
-
-        if (window.confirm('¿Estás seguro de que quieres eliminar este perfil de niño? Esta acción es irreversible.')) {
-            try {
-                await deleteChildProfile(user.uid, childId);
-                await fetchData(); // Recargar todos los perfiles para reflejar la eliminación
-            } catch (error) {
-                console.error('Error deleting child profile:', error);
-                alert('Error al eliminar el perfil del niño. Consulta la consola.');
+        // ... (Tu lógica existente para eliminar niño) ...
+        try {
+            await deleteChildProfile(user!.uid, childId);
+            // Si el perfil eliminado era el activo, límpialo del UserProvider
+            if (activeChildProfile && activeChildProfile.id === childId) {
+                setActiveChildProfile(null);
+                console.log("BibliotecaPage: Deleted active child profile. Clearing from UserProvider.");
             }
+            await fetchData();
+        } catch (error) {
+            console.error('Error deleting child profile:', error);
+            alert('Error al eliminar el perfil del niño. Consulta la consola.');
         }
     };
-
 
     if (loading) {
         return (
@@ -228,25 +198,27 @@ const BibliotecaPage = () => {
     }
 
     if (!user) {
-        return null;
+        return null; // o redirigir directamente aquí
     }
 
+    // Aquí ya tenemos un user, pero aún podríamos estar cargando los perfiles de niños.
+    // Mostrar un spinner si childrenProfiles está vacío y no estamos en estado de "sin perfiles"
     if (!userData && childrenProfiles.length === 0 && !loading) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-gray-100">
-                <p>Cargando datos del usuario...</p>
+                <p>Cargando datos del usuario y perfiles...</p>
             </div>
         );
     }
 
     const handleChildClick = (child: ChildProfile) => {
         console.log("BibliotecaPage: Child profile clicked. Setting as active:", child);
-        setActiveChildProfile(child); // Establece el perfil del niño como activo
-        router.push(`/actividades`); // Redirige a la nueva zona de actividades
+        setActiveChildProfile(child);
+        router.push(`/actividades`);
     };
 
     return (
-        <div className="bg-no-repeat h-screen bg-[url('/biblioteca/fondo.webp')]">
+        <div className="bg-no-repeat h-screen bg-[url('/biblioteca/fondo.webp')] opacity-80">
             {/* Navbar superior, similar a tu imagen image_12d88f.png */}
             <nav className="-5xl flex justify-around items-center py-4 px-6 bg-[#C6FFF3] rounded-lg shadow-md mb-8">
                 <div className="flex items-center">
@@ -301,21 +273,21 @@ const BibliotecaPage = () => {
                             <div key={child.id} className="relative bg-white p-4 rounded-b-lg shadow-2xl w-48 text-center  hover:shadow-xl transition-shadow duration-200">
                                 {/* Etiqueta "ACTIVA" si el perfil está activo (ej. si es el que ha iniciado sesión un niño) */}
                                 {/* <div className="absolute top-2 left-2 bg-green-500 text-white text-xs font-bold px-2 py-1 rounded-full">ACTIVA</div> */}
-                                <img src={child.avatarUrl} alt={child.name}  className=" bg-[#EBF3F9] w-28 h-28 rounded-full mx-auto mb-3 object-cover border-4 border-purple-400" />
+                                <img src={getAvatarById(child.avatarId)} alt={child.name}  className=" bg-[#EBF3F9] w-28 h-28 rounded-full mx-auto mb-3 object-cover object-top border-4 border-purple-400" />
                                 <p className="font-semibold text-xl text-purple-800 mb-1">{child.name}</p>
                                 
                                 
                                 {/* Botones de Editar y Eliminar para CADA niño */}
                                 <div className="flex justify-center gap-2 mt-2">
                                     <button
-                                        onClick={() => handleEditClick(child)}
+                                        onClick={(e) => { e.stopPropagation();handleEditClick(child);}} 
                                         className="p-1 rounded-full  text-white transition-colors duration-200"
                                         title="Editar perfil"
                                     >
                                         <Image src={pencil} alt='pencil'/>
                                     </button>
                                     <button
-                                        onClick={() => handleDeleteChild(child.id!)} // Aseguramos que child.id exista
+                                        onClick={(e) => { e.stopPropagation();handleDeleteChild(child.id!)} } // Aseguramos que child.id exista
                                         className="p-1 rounded-full  text-white transition-colors duration-200"
                                         title="Eliminar perfil"
                                     >

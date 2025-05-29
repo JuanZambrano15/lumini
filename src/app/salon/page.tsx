@@ -11,13 +11,14 @@ import nino from "../../../public/actividades/hombre.webp"
 import nina from "../../../public/actividades/mujer.webp"
 import noBinario from "../../../public/actividades/no-binario.webp"
 import imagenDefaultActividades from "../../../public/actividades/no-binario.webp"
+import { getAvatarById } from '../../lib/avatars';
 
 
 
 const salonPage =() =>{
         const router = useRouter();
         const { user, loading, activeChildProfile } = useUser();
-        const [displayedImageSrc, setDisplayedImageSrc] = useState(imagenDefaultActividades.src);
+        const [displayedImageSrc, setDisplayedImageSrc] = useState('/path/to/loading_avatar.webp'); // Puedes poner un avatar de carga aquí
 
         useEffect(() => {
             console.log("ActividadesPage useEffect: loading =", loading, ", user =", !!user, ", activeChildProfile =", activeChildProfile);
@@ -37,25 +38,11 @@ const salonPage =() =>{
             // Mueve toda la lógica de asignación de imagen aquí dentro del useEffect
             // Asegúrate de que solo se ejecute si activeChildProfile existe
             if (activeChildProfile) {
-                let selectedImage = imagenDefaultActividades.src; // Por defecto
-                switch (activeChildProfile.sexo) { // ¡Usamos 'sexo' aquí!
-                    case 'hombre':
-                        selectedImage = nino.src;
-                        break;
-                    case 'mujer':
-                        selectedImage = nina.src;
-                        break;
-                    case 'prefiero no decirlo':
-                        selectedImage = noBinario.src;
-                        break;
-                    default:
-                        // Si el sexo no coincide o es nulo, usa la imagen por defecto
-                        selectedImage = imagenDefaultActividades.src;
-                        break;
-                }
-                setDisplayedImageSrc(selectedImage);
-                console.log(`ActividadesPage: Setting displayed image based on sexo (${activeChildProfile.sexo}):`, selectedImage);
-            }
+            // Usa el avatarId del perfil para obtener la imagen
+            const avatarSrc = getAvatarById(activeChildProfile.avatarId);
+            setDisplayedImageSrc(avatarSrc);
+            console.log(`Página: Setting displayed avatar based on avatarId (${activeChildProfile.avatarId}):`, avatarSrc);
+        }
 
     }, [user, loading, activeChildProfile, router]);
 

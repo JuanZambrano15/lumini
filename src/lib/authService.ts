@@ -89,16 +89,17 @@ import {
     
 };
 import { collection, addDoc, query, where, getDocs, deleteDoc, updateDoc } from 'firebase/firestore'; // Nuevos imports para Firestore
-
+const parentsCollection = collection(db, 'parents');
 // Define la interfaz para los datos de un niño
 export interface ChildProfile {
     id?: string; // El ID del documento de Firestore
     name: string;
-    avatarUrl: string; // URL de la imagen del avatar
+    avatarUrl?: string; // URL de la imagen del avatar
     sexo: 'hombre' | 'mujer' | 'prefiero no decirlo'; // Campo de sexo
     tipoLimitacion: 'tdha'; // Por ahora, solo TDHA
     // Puedes añadir más campos aquí, como edad, género, progreso, etc.
     age?: number;
+    avatarId?: number;
     }
 
     // --- Funciones para Perfiles de Niños ---
@@ -125,18 +126,27 @@ export interface ChildProfile {
 };
     export const createChildProfile = async (
     userId: string,
-    profileData: Omit<ChildProfile, 'id'>
-    ): Promise<ChildProfile | null> => {
+    profileData: Omit<ChildProfile, 'id' | 'parentId'> // Omit parentId si lo añades automáticamente
+): Promise<ChildProfile> => {
     try {
-        const childrenCollectionRef = collection(db, 'users', userId, 'children');
-        const docRef = await addDoc(childrenCollectionRef, profileData);
-        console.log('Perfil de niño creado con ID:', docRef.id);
-        return { id: docRef.id, ...profileData };
+        const parentDocRef = doc(parentsCollection, userId);
+        const childrenCollectionRef = collection(parentDocRef, 'children');
+
+        const finalProfileData = {
+            ...profileData,
+            parentId: userId, // Asegúrate de que parentId se agregue al objeto
+            avatarId: profileData.avatarId || 1, // Fallback para avatarId
+        };
+
+        const newChildDocRef = doc(childrenCollectionRef);
+        await setDoc(newChildDocRef, finalProfileData);
+
+        return { id: newChildDocRef.id, ...finalProfileData }; // <<-- Devolver el perfil completo con ID
     } catch (error) {
-        console.error('Error creating child profile:', error);
+        console.error("Error creating child profile:", error);
         throw error;
     }
-    };
+};
 
     export const getChildrenProfiles = async (userId: string): Promise<ChildProfile[]> => {
     try {

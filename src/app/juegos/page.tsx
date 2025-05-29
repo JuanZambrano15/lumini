@@ -34,11 +34,12 @@ import faltanteAtencionIcon from '../../../public/juego/peces.png'; // Ejemplo
 import laberintoIcon from '../../../public/juego/laberinto.png'; // Ejemplo
 import coloreaIcon from '../../../public/juego/colorear.png'; // Ejemplo
 import ositoIcon from '../../../public/juego/osito.png'
+import { getAvatarById } from '../../lib/avatars';
 
 const JuegosPage = () => {
     const router = useRouter();
     const { user, loading, activeChildProfile } = useUser();
-    const [displayedAvatarSrc, setDisplayedAvatarSrc] = useState(defaultAvatarImage.src);
+    const [displayedAvatarSrc, setDisplayedImageSrc] = useState('/path/to/loading_avatar.webp'); // Puedes poner un avatar de carga aquí;
     const [activeCategory, setActiveCategory] = useState<'razonamiento' | 'memoria' | 'atencion'>('razonamiento'); // Estado para la categoría activa
 
     useEffect(() => {
@@ -53,22 +54,10 @@ const JuegosPage = () => {
         }
 
         if (activeChildProfile) {
-            let selectedImage = defaultAvatarImage.src;
-            switch (activeChildProfile.sexo) {
-                case 'hombre':
-                    selectedImage = ninoImage.src;
-                    break;
-                case 'mujer':
-                    selectedImage = ninaImage.src;
-                    break;
-                case 'prefiero no decirlo':
-                    selectedImage = noBinarioImage.src;
-                    break;
-                default:
-                    selectedImage = defaultAvatarImage.src;
-                    break;
-            }
-            setDisplayedAvatarSrc(selectedImage);
+            // Usa el avatarId del perfil para obtener la imagen
+            const avatarSrc = getAvatarById(activeChildProfile.avatarId);
+            setDisplayedImageSrc(avatarSrc);
+            console.log(`Página: Setting displayed avatar based on avatarId (${activeChildProfile.avatarId}):`, avatarSrc);
         }
     }, [user, loading, activeChildProfile, router]);
 
