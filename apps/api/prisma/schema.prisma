@@ -1,0 +1,305 @@
+// Esquema relacional de Lumini.
+// Convención: modelos en PascalCase (singular) y tablas/columnas en snake_case.
+
+generator client {
+  provider     = "prisma-client"
+  output       = "../src/generated/prisma"
+  moduleFormat = "cjs"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ─── Cuentas ──────────────────────────────────────────────────────────────────
+
+/// Cuenta de un padre, madre o acudiente. Es quien inicia sesión.
+model User {
+  id            String   @id @default(uuid()) @db.Uuid
+  email         String   @unique
+  passwordHash  String   @map("password_hash")
+  name          String?
+  /// PIN de la zona de padres (hash argon2). Null hasta que se configura.
+  parentPinHash String?  @map("parent_pin_hash")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  children      Child[]
+  refreshTokens RefreshToken[]
+
+  @@map("users")
+}
+
+/// Refresh tokens emitidos. Solo se guarda su hash para poder revocarlos.
+model RefreshToken {
+  id        String    @id @default(uuid()) @db.Uuid
+  userId    String    @map("user_id") @db.Uuid
+  tokenHash String    @unique @map("token_hash")
+  expiresAt DateTime  @map("expires_at")
+  revokedAt DateTime? @map("revoked_at")
+  createdAt DateTime  @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("refresh_tokens")
+}
+
+// ─── Perfiles de niños ────────────────────────────────────────────────────────
+
+enum Gender {
+  BOY
+  GIRL
+  UNSPECIFIED
+}
+
+/// Necesidad de apoyo declarada por el acudiente. Es un dato sensible:
+/// solo lo puede leer el dueño de la cuenta.
+enum SupportNeed {
+  NONE
+  ADHD
+}
+
+model Avatar {
+  id        Int    @id @default(autoincrement())
+  /// Identificador estable que el frontend usa para resolver la imagen.
+  slug      String @unique
+  name      String
+  sortOrder Int    @default(0) @map("sort_order")
+
+  children Child[]
+
+  @@map("avatars")
+}
+
+model Child {
+  id          String      @id @default(uuid()) @db.Uuid
+  userId      String      @map("user_id") @db.Uuid
+  name        String
+  gender      Gender      @default(UNSPECIFIED)
+  supportNeed SupportNeed @default(NONE) @map("support_need")
+  avatarId    Int         @map("avatar_id")
+  /// Saldo actual de estrellas. Se mantiene en sincronía con star_transactions.
+  stars       Int         @default(0)
+  /// Los padres deciden si el niño puede hacerle preguntas a Lumi (IA). Apagado por defecto.
+  aiEnabled   Boolean     @default(false) @map("ai_enabled")
+  createdAt   DateTime    @default(now()) @map("created_at")
+  updatedAt   DateTime    @updatedAt @map("updated_at")
+
+  user             User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  avatar           Avatar            @relation(fields: [avatarId], references: [id])
+  activityAttempts ActivityAttempt[]
+  gameSessions     GameSession[]
+  items            ChildItem[]
+  aiQuestions      AiQuestion[]
+  starTransactions StarTransaction[]
+
+  @@index([userId])
+  @@map("children")
+}
+
+// ─── Aprendizaje ──────────────────────────────────────────────────────────────
+
+model Topic {
+  id          Int    @id @default(autoincrement())
+  slug        String @unique
+  title       String
+  description String
+  sortOrder   Int    @default(0) @map("sort_order")
+  /// Pasos del tutorial: [{ title, text, visual? }]
+  tutorial    Json
+
+  activities Activity[]
+
+  @@map("topics")
+}
+
+enum ActivityKind {
+  PRACTICE
+  EVALUATION
+}
+
+model Activity {
+  id        Int          @id @default(autoincrement())
+  topicId   Int          @map("topic_id")
+  slug      String       @unique
+  title     String
+  kind      ActivityKind
+  sortOrder Int          @default(0) @map("sort_order")
+  /// Preguntas: [{ prompt, visual?, options: string[], answer: number }].
+  /// La respuesta correcta nunca se envía al cliente.
+  questions Json
+
+  topic    Topic             @relation(fields: [topicId], references: [id], onDelete: Cascade)
+  attempts ActivityAttempt[]
+
+  @@map("activities")
+}
+
+model ActivityAttempt {
+  id          String   @id @default(uuid()) @db.Uuid
+  childId     String   @map("child_id") @db.Uuid
+  activityId  Int      @map("activity_id")
+  correct     Int
+  total       Int
+  starsEarned Int      @map("stars_earned")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  child    Child    @relation(fields: [childId], references: [id], onDelete: Cascade)
+  activity Activity @relation(fields: [activityId], references: [id], onDelete: Cascade)
+
+  @@index([childId, activityId])
+  @@map("activity_attempts")
+}
+
+// ─── Juegos ───────────────────────────────────────────────────────────────────
+
+enum GameCategory {
+  REASONING
+  MEMORY
+  ATTENTION
+}
+
+model Game {
+  id                 Int          @id @default(autoincrement())
+  slug               String       @unique
+  name               String
+  description        String
+  category           GameCategory
+  sortOrder          Int          @default(0) @map("sort_order")
+  /// Los juegos aún no implementados se muestran como "Próximamente".
+  isAvailable        Boolean      @default(false) @map("is_available")
+  maxStarsPerSession Int          @default(3) @map("max_stars_per_session")
+
+  sessions GameSession[]
+
+  @@map("games")
+}
+
+model GameSession {
+  id          String   @id @default(uuid()) @db.Uuid
+  childId     String   @map("child_id") @db.Uuid
+  gameId      Int      @map("game_id")
+  /// Puntaje normalizado 0-100 calculado por el juego.
+  score       Int
+  durationSec Int      @map("duration_sec")
+  starsEarned Int      @map("stars_earned")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  child Child @relation(fields: [childId], references: [id], onDelete: Cascade)
+  game  Game  @relation(fields: [gameId], references: [id], onDelete: Cascade)
+
+  @@index([childId, gameId, createdAt])
+  @@map("game_sessions")
+}
+
+// ─── Pozo de los deseos: tienda de personalización ───────────────────────────
+
+/** Dónde se usa el objeto: sobre el avatar o como decoración de la casa. */
+enum ItemKind {
+  AVATAR
+  HOME
+}
+
+/**
+ * Espacio que ocupa un objeto. Solo puede haber un objeto equipado por espacio
+ * (p. ej. una sola cosa en la cabeza). Los de la casa tienen cada uno su lugar.
+ */
+enum ItemSlot {
+  HEAD
+  FACE
+  BACK
+  HOME_FLOOR
+  HOME_WALL
+  HOME_SHELF
+  HOME_WINDOW
+}
+
+model ShopItem {
+  id        Int      @id @default(autoincrement())
+  slug      String   @unique
+  name      String
+  emoji     String
+  kind      ItemKind
+  slot      ItemSlot
+  cost      Int
+  sortOrder Int      @default(0) @map("sort_order")
+
+  owners ChildItem[]
+
+  @@map("shop_items")
+}
+
+/** Objeto comprado por un niño. */
+model ChildItem {
+  childId     String   @map("child_id") @db.Uuid
+  itemId      Int      @map("item_id")
+  equipped    Boolean  @default(true)
+  purchasedAt DateTime @default(now()) @map("purchased_at")
+
+  child Child    @relation(fields: [childId], references: [id], onDelete: Cascade)
+  item  ShopItem @relation(fields: [itemId], references: [id], onDelete: Cascade)
+
+  @@id([childId, itemId])
+  @@map("child_items")
+}
+
+// ─── Pozo de los deseos: preguntas a Lumi (IA) ────────────────────────────────
+
+/** Resultado de los filtros de seguridad sobre una pregunta. */
+enum QuestionStatus {
+  /** Respondida normalmente. */
+  ANSWERED
+  /** El filtro local la bloqueó antes de llegar a la IA (datos personales, groserías). */
+  BLOCKED
+  /** La IA la marcó como no apropiada y respondió con una redirección segura. */
+  REDIRECTED
+}
+
+/**
+ * Historial de preguntas que el niño le hizo a Lumi. Los padres lo pueden
+ * revisar completo desde su zona.
+ */
+model AiQuestion {
+  id          String         @id @default(uuid()) @db.Uuid
+  childId     String         @map("child_id") @db.Uuid
+  question    String
+  answer      String
+  status      QuestionStatus
+  /** Motivo del bloqueo o categoría reportada por la IA. */
+  reason      String?
+  starsSpent  Int            @map("stars_spent")
+  createdAt   DateTime       @default(now()) @map("created_at")
+
+  child Child @relation(fields: [childId], references: [id], onDelete: Cascade)
+
+  @@index([childId, createdAt])
+  @@map("ai_questions")
+}
+
+// ─── Estrellas (libro mayor) ──────────────────────────────────────────────────
+
+enum StarReason {
+  ACTIVITY
+  GAME
+  SHOP_PURCHASE
+  AI_QUESTION
+  AI_REFUND
+}
+
+/// Cada movimiento de estrellas queda registrado para auditoría y para el
+/// historial que ven los padres. amount es positivo (gana) o negativo (gasta).
+model StarTransaction {
+  id          String     @id @default(uuid()) @db.Uuid
+  childId     String     @map("child_id") @db.Uuid
+  amount      Int
+  reason      StarReason
+  referenceId String?    @map("reference_id")
+  description String
+  createdAt   DateTime   @default(now()) @map("created_at")
+
+  child Child @relation(fields: [childId], references: [id], onDelete: Cascade)
+
+  @@index([childId, createdAt])
+  @@map("star_transactions")
+}

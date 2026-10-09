@@ -1,0 +1,17 @@
+packages:
+  - apps/*
+
+# pnpm 10 no ejecuta scripts de instalación por defecto: aquí se decide
+# explícitamente qué paquetes pueden compilar binarios nativos o motores.
+onlyBuiltDependencies:
+  - '@nestjs/core'
+  - '@prisma/engines'
+  - argon2
+  - esbuild
+  - prisma
+
+# Scripts opcionales (telemetría, watchers nativos) que no necesitamos.
+ignoredBuiltDependencies:
+  - '@parcel/watcher'
+  - '@scarf/scarf'
+  - unrs-resolver

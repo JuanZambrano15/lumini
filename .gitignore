@@ -1,0 +1,28 @@
+# Dependencias
+node_modules/
+.pnpm-store/
+
+# Builds
+dist/
+build/
+coverage/
+*.tsbuildinfo
+
+# Prisma (cliente generado en cada build)
+apps/api/src/generated/
+
+# Capacitor (proyectos nativos generados localmente)
+apps/web/android/
+apps/web/ios/
+
+# Variables de entorno: solo se versionan los ejemplos
+.env
+.env.*
+!.env.example
+
+# Logs y sistema
+*.log
+.DS_Store
+.idea/
+.vscode/*
+!.vscode/extensions.json

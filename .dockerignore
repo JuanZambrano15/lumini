@@ -1,0 +1,14 @@
+**/node_modules
+**/dist
+**/coverage
+**/.env
+**/.env.*
+!**/.env.example
+apps/api/src/generated
+apps/web/android
+apps/web/ios
+.git
+.github
+.husky
+*.md
+**/*.tsbuildinfo

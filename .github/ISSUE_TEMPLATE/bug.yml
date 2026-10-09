@@ -1,0 +1,25 @@
+name: 🐛 Reporte de error
+description: Algo no funciona como debería
+labels: [bug]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: ¿Qué pasó?
+      description: Describe el error y qué esperabas que pasara.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Pasos para reproducirlo
+      placeholder: |
+        1. Ir a…
+        2. Hacer clic en…
+    validations:
+      required: true
+  - type: dropdown
+    id: platform
+    attributes:
+      label: Plataforma
+      options: [Web (escritorio), Web (celular), APK Android]

@@ -1,0 +1,54 @@
+# Lumini completo (base de datos + API + web) con un solo comando:
+#   cp .env.example .env   # y cambia los secretos
+#   docker compose up --build
+# Web: http://localhost:8080 · API docs: http://localhost:8080/api/docs
+
+name: lumini
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: lumini
+      POSTGRES_USER: lumini
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Define POSTGRES_PASSWORD en .env}
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    ports:
+      - '127.0.0.1:5432:5432' # Solo accesible desde tu máquina (para desarrollo).
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U lumini -d lumini']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://lumini:${POSTGRES_PASSWORD}@db:5432/lumini
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET:?Define JWT_ACCESS_SECRET en .env}
+      JWT_PARENT_SECRET: ${JWT_PARENT_SECRET:?Define JWT_PARENT_SECRET en .env}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:8080,capacitor://localhost,https://localhost}
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      LUMI_MODEL: ${LUMI_MODEL:-gemini-3.1-flash-lite}
+
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+    restart: unless-stopped
+    depends_on:
+      api:
+        condition: service_healthy
+    ports:
+      - '8080:80'
+
+volumes:
+  db-data:
