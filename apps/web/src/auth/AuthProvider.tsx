@@ -1,5 +1,5 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { type ReactNode, useCallback, useEffect, useMemo } from 'react';
+import { type ReactNode, useCallback, useEffect, useMemo, useState } from 'react';
 import { api, session } from '@/api/client';
 import { queryKeys } from '@/api/hooks';
 import type { AuthResult, User } from '@/api/types';
@@ -8,17 +8,24 @@ import { AuthContext, type AuthContextValue } from './contexts';
 export function AuthProvider({ children }: { children: ReactNode }) {
   const queryClient = useQueryClient();
 
-  const { data: user = null, isLoading } = useQuery({
+  // Los tokens viven fuera de React (en api/client), así que este estado es lo que
+  // obliga a re-renderizar al entrar o salir. Sin él, `user` seguía con el usuario
+  // anterior después de cerrar sesión y las rutas creían que aún había sesión.
+  const [hasSession, setHasSession] = useState(session.hasTokens);
+
+  const { data, isLoading } = useQuery({
     queryKey: queryKeys.me,
     queryFn: () => api<User>('/me'),
-    enabled: session.hasTokens(),
+    enabled: hasSession,
     retry: false,
     staleTime: Infinity,
   });
+  const user = hasSession ? (data ?? null) : null;
 
   const clearSession = useCallback(() => {
     session.setTokens(null);
     session.setParentToken(null);
+    setHasSession(false);
     queryClient.clear();
   }, [queryClient]);
 
@@ -32,6 +39,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     async (result: AuthResult) => {
       session.setTokens(result);
       await queryClient.fetchQuery({ queryKey: queryKeys.me, queryFn: () => api<User>('/me') });
+      setHasSession(true);
     },
     [queryClient],
   );
@@ -39,7 +47,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const value = useMemo<AuthContextValue>(
     () => ({
       user,
-      isLoading: session.hasTokens() && isLoading,
+      isLoading: hasSession && isLoading,
       login: async (email, password) =>
         startSession(
           await api<AuthResult>('/auth/login', {
@@ -68,7 +76,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
       },
     }),
-    [user, isLoading, startSession, clearSession],
+    [user, hasSession, isLoading, startSession, clearSession],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

@@ -58,7 +58,7 @@ function NotFound() {
         <p className="text-7xl" aria-hidden>
           🧭
         </p>
-        <h1 className="mt-4 text-3xl font-extrabold text-brand-700">Esta página no existe</h1>
+        <h1 className="mt-4 text-3xl font-bold text-brand-700">Esta página no existe</h1>
         <Link to="/" className="mt-4 inline-block font-bold text-brand-700 underline">
           Volver al inicio
         </Link>

@@ -16,7 +16,7 @@ export function TutorialPage() {
 
   return (
     <ChildLayout title={topic?.title ?? 'Tutorial'} backTo="/estudio">
-      <section className="mx-auto flex max-w-2xl flex-col items-center gap-6 rounded-3xl bg-white p-6 text-center shadow-xl">
+      <section className="mx-auto flex max-w-2xl flex-col items-center gap-6 rounded-[36px] border-[3px] border-[#2b2b2b] bg-[#f3e19c] p-6 text-center shadow-xl sm:p-10">
         {isLoading && <Spinner />}
         {error && <ErrorMessage error={error} onRetry={() => void refetch()} />}
         {topic && current && (
@@ -24,13 +24,13 @@ export function TutorialPage() {
             <p className="font-bold text-brand-500">
               Paso {step + 1} de {topic.tutorial.length}
             </p>
-            <h2 key={step} className="animate-pop text-3xl font-extrabold text-brand-700">
+            <h2 key={step} className="animate-pop text-3xl font-bold text-brand-700">
               {current.title}
             </h2>
             {current.visual && (
               <p className="text-5xl leading-snug sm:text-6xl">{current.visual}</p>
             )}
-            <p className="text-xl">{current.text}</p>
+            <p className="max-w-[60ch] font-read text-2xl leading-relaxed">{current.text}</p>
             <div className="flex gap-3">
               <Button variant="secondary" disabled={step === 0} onClick={() => setStep(step - 1)}>
                 ← Anterior

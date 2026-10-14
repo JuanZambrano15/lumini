@@ -33,8 +33,8 @@ export function ChangePinForm() {
   }
 
   return (
-    <section className="rounded-3xl bg-white p-6 shadow-xl">
-      <h2 className="mb-4 text-xl font-extrabold text-brand-700">Cambiar PIN</h2>
+    <section className="rounded-[36px] bg-white p-6 shadow-[0_12px_40px_rgba(61,36,112,0.18)] sm:p-8">
+      <h2 className="mb-4 text-xl font-bold text-brand-700">Cambiar PIN</h2>
       <form
         onSubmit={(event) => void handleSubmit(event)}
         className="grid gap-3 sm:grid-cols-3 sm:items-end"

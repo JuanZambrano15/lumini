@@ -56,7 +56,7 @@ export function AskLumiTab({ onSpend }: { onSpend: () => void }) {
         onSubmit={handleSubmit}
         className="flex flex-col gap-3 rounded-3xl bg-white p-6 shadow-xl"
       >
-        <label htmlFor="lumi-question" className="text-xl font-extrabold text-brand-700">
+        <label htmlFor="lumi-question" className="text-xl font-bold text-brand-700">
           ¿Qué te gustaría saber?
         </label>
         <textarea
@@ -86,7 +86,7 @@ export function AskLumiTab({ onSpend }: { onSpend: () => void }) {
 
       {history.data && history.data.length > 0 && (
         <section className="flex flex-col gap-3">
-          <h2 className="self-start rounded-full bg-white/90 px-4 py-1 text-2xl font-extrabold text-brand-700">
+          <h2 className="self-start rounded-full bg-white/90 px-4 py-1 text-2xl font-bold text-brand-700">
             Mis preguntas
           </h2>
           {history.data

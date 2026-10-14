@@ -1,6 +1,6 @@
 import type { ButtonHTMLAttributes } from 'react';
 
-type Variant = 'primary' | 'secondary' | 'ghost' | 'danger' | 'sun';
+type Variant = 'primary' | 'secondary' | 'ghost' | 'danger' | 'sun' | 'pill';
 
 const variants: Record<Variant, string> = {
   primary: 'bg-brand-600 text-white hover:bg-brand-700 shadow-[0_4px_0_var(--color-brand-900)]',
@@ -8,6 +8,8 @@ const variants: Record<Variant, string> = {
   ghost: 'bg-transparent text-brand-700 hover:bg-brand-100',
   danger: 'bg-red-500 text-white hover:bg-red-600',
   sun: 'bg-sun text-ink hover:brightness-105 shadow-[0_4px_0_#c9a800]',
+  /** Botón grande del login del Figma (lila, mayúsculas espaciadas). */
+  pill: 'h-20 w-full max-w-[349px] rounded-[28px]! bg-lilac-strong text-[22px] tracking-[0.16em] text-white uppercase hover:bg-brand-700',
 };
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {

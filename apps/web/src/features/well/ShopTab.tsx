@@ -39,7 +39,7 @@ export function ShopTab({ onSpend }: { onSpend: () => void }) {
       {sections.map((section) => (
         <section key={section.kind}>
           <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-            <h2 className="rounded-full bg-white/90 px-4 py-1 text-2xl font-extrabold text-brand-700">
+            <h2 className="rounded-full bg-white/90 px-4 py-1 text-2xl font-bold text-brand-700">
               {section.title}
             </h2>
             <Link
@@ -62,7 +62,7 @@ export function ShopTab({ onSpend }: { onSpend: () => void }) {
                     <span className="text-5xl" aria-hidden>
                       {item.emoji}
                     </span>
-                    <p className="font-extrabold">{item.name}</p>
+                    <p className="font-bold">{item.name}</p>
                     <p className="text-xs text-ink/60">{SLOT_LABEL[item.slot]}</p>
                     {own ? (
                       <Button

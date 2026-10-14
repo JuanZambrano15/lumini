@@ -29,7 +29,7 @@ export function Modal({ title, open, onClose, children }: ModalProps) {
       {open && (
         <div className="animate-pop p-6">
           <div className="mb-4 flex items-start justify-between gap-4">
-            <h2 id="modal-title" className="text-2xl font-extrabold text-brand-700">
+            <h2 id="modal-title" className="text-2xl font-bold text-brand-700">
               {title}
             </h2>
             <button

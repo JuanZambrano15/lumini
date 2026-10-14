@@ -62,7 +62,7 @@ export function WishingWellPage() {
               aria-selected={tab === item.key}
               aria-controls={`panel-${item.key}`}
               onClick={() => setTab(item.key)}
-              className={`rounded-full px-5 py-2 font-display text-lg font-extrabold shadow transition ${
+              className={`rounded-full px-5 py-2 font-display text-lg font-bold shadow transition ${
                 tab === item.key ? 'bg-brand-600 text-white' : 'bg-white text-brand-700'
               }`}
             >

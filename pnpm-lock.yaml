@@ -147,10 +147,10 @@ importers:
       '@capacitor/core':
         specifier: ^8.5.3
         version: 8.5.3
-      '@fontsource-variable/nunito':
+      '@fontsource-variable/lexend':
         specifier: ^5.3.0
         version: 5.3.0
-      '@fontsource/baloo-2':
+      '@fontsource/andika':
         specifier: ^5.3.0
         version: 5.3.0
       '@tanstack/react-query':
@@ -748,11 +748,11 @@ packages:
     resolution: {integrity: sha512-IkO+/KEUvwbVpiURZg+P7zF74z5Jxe0UgJxVni+RtoHQ6IZieXaO02kmadomap/q+l6bc/jdPGGqTjhuZnuz1Q==}
     engines: {node: ^20.19.0 || ^22.13.0 || >=24}
 
-  '@fontsource-variable/nunito@5.3.0':
-    resolution: {integrity: sha512-tw0ch7evIDSwoeUy+0XzocYHfbRWLeCRPJy22KgbrLjDLAbNw/fErBiil10Ssrs3Sjr55zaZrr36a975j8cBkQ==}
+  '@fontsource-variable/lexend@5.3.0':
+    resolution: {integrity: sha512-3SXtiZ8rFbT0oaPzEboCG5RM3jtyhpNxandh1jWNLqvrJRfV/eP3R+GGw+o5e3hS1uqmAGutKxSvaWG5oyrimA==}
 
-  '@fontsource/baloo-2@5.3.0':
-    resolution: {integrity: sha512-CBuxZ27jvMmD5+KaaPkMWv/yjdRNppVAd5/002yAyvyQyLNL3aZCbkx6gbAT/bjxPd1A0VMdDQjfcELI8chccQ==}
+  '@fontsource/andika@5.3.0':
+    resolution: {integrity: sha512-m15/VavWcrOhTJr4xXVKTKrJgI8Ny4fI52ZwcoYH3kH6IyLpAfuYUuFouI223WFbDP0kwvKsOOankklFNyMvNw==}
 
   '@google/genai@2.28.0':
     resolution: {integrity: sha512-hyNAJj+ywu3L46qlZod6KO/JvcT3QONz6VCiPevC/FWOjAD+LQb7DMLUoV8vzoLpt61Q0ruQX99iqbxEjPJWmw==}
@@ -5625,9 +5625,9 @@ snapshots:
       '@eslint/core': 1.2.1
       levn: 0.4.1
 
-  '@fontsource-variable/nunito@5.3.0': {}
+  '@fontsource-variable/lexend@5.3.0': {}
 
-  '@fontsource/baloo-2@5.3.0': {}
+  '@fontsource/andika@5.3.0': {}
 
   '@google/genai@2.28.0':
     dependencies:

@@ -1,24 +1,60 @@
 @import 'tailwindcss';
-@import '@fontsource-variable/nunito';
-@import '@fontsource/baloo-2/latin-600.css';
-@import '@fontsource/baloo-2/latin-800.css';
+@import '@fontsource-variable/lexend';
+@import '@fontsource/andika/latin-400.css';
+@import '@fontsource/andika/latin-700.css';
 
-/* Tokens de diseño de Lumini (colores tomados del logo). */
+/*
+ * Tokens de diseño de Lumini, tomados del Figma "MD Learning" y ajustados para
+ * niños de 1.º a 3.º de primaria con TDAH:
+ * - Lexend (interfaz y títulos): diseñada para reducir el esfuerzo visual al leer.
+ * - Andika (textos para leer: lecciones y preguntas): hecha para lectores que
+ *   empiezan; su "a" y su "g" son como las que aprenden a escribir a mano.
+ * - Fondos suaves (menta, celeste, lila) y un solo color fuerte por pantalla
+ *   para la acción principal. Todo texto cumple contraste WCAG AA.
+ */
 @theme {
-  --font-sans: 'Nunito Variable', ui-sans-serif, system-ui, sans-serif;
-  --font-display: 'Baloo 2', 'Nunito Variable', ui-sans-serif, sans-serif;
+  --font-sans: 'Lexend Variable', ui-sans-serif, system-ui, sans-serif;
+  --font-display: 'Lexend Variable', ui-sans-serif, system-ui, sans-serif;
+  --font-read: 'Andika', 'Lexend Variable', ui-sans-serif, sans-serif;
 
-  --color-brand-50: #f5f3ff;
-  --color-brand-100: #ede9fe;
-  --color-brand-200: #ddd6fe;
-  --color-brand-300: #c4b5fd;
-  --color-brand-400: #a78bfa;
-  --color-brand-500: #8b5cf6;
-  --color-brand-600: #7c3aed;
-  --color-brand-700: #6d28d9;
-  --color-brand-900: #3b0764;
+  /* Escala lila del Figma. brand-600 es el lila del botón oscurecido para que el
+     texto blanco tenga contraste AA (4.6:1). */
+  --color-brand-50: #f7f2fd;
+  --color-brand-100: #efe5fb;
+  --color-brand-200: #e5d0f3;
+  --color-brand-300: #cfb0ec;
+  --color-brand-400: #b693e4;
+  --color-brand-500: #9d74dc;
+  --color-brand-600: #8a5cd6;
+  --color-brand-700: #6f42b8;
+  --color-brand-900: #3d2470;
 
-  --color-mint: #9dfde9;
+  /* Colores del Figma. */
+  --color-mint: #c6fff3;
+  --color-mint-line: #799a97;
+  --color-lilac: #e5d0f3;
+  --color-lilac-line: #9b5fd6;
+  --color-lilac-ink: #7b2cbf;
+  /* El lila del botón del Figma (#b693e4) no da contraste con texto blanco: se oscurece. */
+  --color-lilac-strong: #8a5cd6;
+  --color-orchid: #e4c9e1;
+  --color-cloud: #edf6fc;
+  --color-cloud-line: #d6e4ef;
+  /* Escenas infantiles (Figma). */
+  --color-salir: #e2b3d0;
+  --color-salir-study: #c3b6e3;
+  --color-study-bg: #22a3bc;
+  --color-wood: #c49a73;
+  --color-wood-ink: #3f2f26;
+  --color-games-bg: #9679c9;
+  --color-closet-bg: #e8a07e;
+  --color-parents-from: #7d5595;
+  --color-parents-to: #ab88fc;
+  --color-parents-sub: #f4ddf6;
+  --color-week: #e1b4f5;
+  --color-landing-band: #d5def7;
+  --color-footer-from: #9353ab;
+  --color-footer-to: #6a3a86;
   --color-sun: #ffe066;
   --color-peach: #ffc98b;
   --color-sky: #9ee6f8;
@@ -64,6 +100,9 @@
 
   body {
     @apply bg-brand-50 font-sans text-ink antialiased;
+    /* Interlineado y separación generosos: ayudan a no perder el renglón. */
+    line-height: 1.5;
+    letter-spacing: 0.01em;
   }
 
   h1,

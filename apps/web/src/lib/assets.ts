@@ -44,3 +44,19 @@ export const gameImages: Record<string, string> = {
   colorea: colorear,
   osito,
 };
+
+/** Nombre corto de cada juego, como aparece en las tarjetas del Figma. */
+export const gameLabels: Record<string, string> = {
+  'tres-en-raya': 'Tic tac toe',
+  rompecabezas: 'Puzle',
+  completa: 'Completa',
+  cubo: 'Cubo',
+  cartas: 'Cartas',
+  faltante: 'Faltante',
+  'donde-esta': '¿Dónde está?',
+  colores: 'Colores',
+  'pez-diferente': 'Pez diferente',
+  laberinto: 'Laberinto',
+  colorea: 'Colorea',
+  osito: 'Osito Blash',
+};

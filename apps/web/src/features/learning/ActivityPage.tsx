@@ -83,7 +83,7 @@ function QuestionView({
       <p className="font-bold text-brand-500">
         Pregunta {index + 1} de {total}
       </p>
-      <h2 className="text-3xl font-extrabold">{question.prompt}</h2>
+      <h2 className="font-read text-3xl leading-snug font-bold">{question.prompt}</h2>
       {question.visual && (
         <p className="text-4xl leading-relaxed break-all sm:text-5xl">{question.visual}</p>
       )}
@@ -93,7 +93,7 @@ function QuestionView({
             key={option}
             type="button"
             onClick={() => onChoose(optionIndex)}
-            className="min-h-16 rounded-2xl bg-brand-100 px-4 py-3 text-2xl font-extrabold text-brand-900 shadow-[0_4px_0_var(--color-brand-300)] transition hover:bg-brand-200 active:translate-y-1 active:shadow-none"
+            className="min-h-16 rounded-2xl bg-brand-100 px-4 py-3 font-read text-2xl font-bold text-brand-900 shadow-[0_4px_0_var(--color-brand-300)] transition hover:bg-brand-200 active:translate-y-1 active:shadow-none"
           >
             {option}
           </button>
@@ -120,11 +120,11 @@ function ResultView({
       <p className="text-6xl" aria-hidden>
         {ratio === 1 ? '🏆' : ratio >= 0.6 ? '🎉' : '💪'}
       </p>
-      <h2 className="text-4xl font-extrabold text-brand-700">{message}</h2>
+      <h2 className="text-4xl font-bold text-brand-700">{message}</h2>
       <p className="text-xl">
         Acertaste <strong>{result.correct}</strong> de {result.total}
       </p>
-      <p className="rounded-full bg-sun px-5 py-2 font-display text-2xl font-extrabold">
+      <p className="rounded-full bg-sun px-5 py-2 font-display text-2xl font-bold">
         +{result.starsEarned} ⭐
       </p>
       {result.starsEarned === 0 && (
@@ -132,7 +132,7 @@ function ResultView({
       )}
       <ul className="w-full space-y-1 text-left">
         {questions.map((question, index) => (
-          <li key={question.prompt} className="flex items-center gap-2">
+          <li key={question.prompt} className="flex items-center gap-2 font-read text-lg">
             <span aria-hidden>{result.results[index] ? '✅' : '❌'}</span>
             <span className="sr-only">{result.results[index] ? 'Correcta:' : 'Incorrecta:'}</span>
             {question.prompt}

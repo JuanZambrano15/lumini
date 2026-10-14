@@ -61,13 +61,13 @@ export function RegisterPage() {
             {error}
           </p>
         )}
-        <Button type="submit" loading={submitting}>
+        <Button type="submit" variant="pill" loading={submitting} className="mx-auto mt-2">
           Crear cuenta
         </Button>
       </form>
       <p className="mt-6 text-center text-sm">
         ¿Ya tienes cuenta?{' '}
-        <Link to="/ingresar" className="font-bold text-brand-700 underline">
+        <Link to="/ingresar" className="font-semibold text-brand-700 underline">
           Inicia sesión
         </Link>
       </p>

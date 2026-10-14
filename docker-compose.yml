@@ -16,7 +16,7 @@ services:
     volumes:
       - db-data:/var/lib/postgresql/data
     ports:
-      - '127.0.0.1:5432:5432' # Solo accesible desde tu máquina (para desarrollo).
+      - '127.0.0.1:5433:5432' # Solo accesible desde tu máquina (para desarrollo).
     healthcheck:
       test: ['CMD-SHELL', 'pg_isready -U lumini -d lumini']
       interval: 5s

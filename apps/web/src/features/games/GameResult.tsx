@@ -22,12 +22,12 @@ export function GameResult({
 }: GameResultProps) {
   return (
     <div className="flex animate-pop flex-col items-center gap-4 text-center" aria-live="polite">
-      <h2 className="text-4xl font-extrabold text-brand-700">{title}</h2>
+      <h2 className="text-4xl font-bold text-brand-700">{title}</h2>
       <p className="text-xl">{detail}</p>
       {isSaving && <Spinner label="Guardando…" />}
       {error ? <ErrorMessage error={error} /> : null}
       {starsEarned !== undefined && (
-        <p className="rounded-full bg-sun px-5 py-2 font-display text-2xl font-extrabold">
+        <p className="rounded-full bg-sun px-5 py-2 font-display text-2xl font-bold">
           +{starsEarned} ⭐
         </p>
       )}

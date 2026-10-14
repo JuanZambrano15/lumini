@@ -1,13 +1,17 @@
+import type { CSSProperties } from 'react';
+import { Link } from 'react-router';
 import { useAvatars, useEquipItem, useOwnedItems, useShopItems, useUpdateChild } from '@/api/hooks';
 import { useCurrentChild } from '@/auth/useActiveChild';
-import closet from '@/assets/scenes/closet.webp';
-import { AvatarImage } from '@/components/AvatarImage';
+import closet from '@/assets/scenes/closet-escena.webp';
 import { ChildAvatar } from '@/components/ChildAvatar';
-import { ChildLayout } from '@/components/ChildLayout';
 import { ErrorMessage } from '@/components/Feedback';
-import { SLOT_LABEL } from '@/features/well/items';
-import { Link } from 'react-router';
+import { Stage } from '@/components/Stage';
+import { box, dp } from '@/lib/stage';
 
+/**
+ * Clóset ("home 2–7" del Figma): el personaje sobre el podio y flechas para
+ * cambiarlo. La primera pantalla solo tiene flecha derecha y la última solo izquierda.
+ */
 export function ClosetPage() {
   const { childId, data: child } = useCurrentChild();
   const { data: avatars = [] } = useAvatars();
@@ -16,83 +20,132 @@ export function ClosetPage() {
   const updateChild = useUpdateChild(childId);
   const equipItem = useEquipItem(childId);
 
+  const index = avatars.findIndex((avatar) => avatar.id === child?.avatarId);
+  const previous = index > 0 ? avatars[index - 1] : undefined;
+  const next = index >= 0 && index < avatars.length - 1 ? avatars[index + 1] : undefined;
+  const current = avatars[index];
+
   const accessories = catalog.filter(
     (item) => item.kind === 'AVATAR' && owned.some((own) => own.itemId === item.id),
   );
   const isEquipped = (itemId: number) => owned.some((own) => own.itemId === itemId && own.equipped);
 
   return (
-    <ChildLayout title="Clóset" backTo="/casa" background={closet}>
-      <div className="mx-auto grid max-w-5xl gap-6 lg:grid-cols-[18rem_1fr]">
-        <section className="flex flex-col items-center rounded-3xl bg-white/90 p-6 shadow-xl">
-          {child && <ChildAvatar child={child} className="h-72 w-52 animate-pop" />}
-          <p className="mt-2 font-display text-2xl font-extrabold text-brand-700">{child?.name}</p>
-        </section>
+    <Stage background="var(--color-closet-bg)" exitTo="/casa" title="Clóset">
+      <img
+        src={closet}
+        alt="Clóset con ropa colgada y un podio blanco"
+        className="absolute inset-0 size-full"
+      />
 
-        <div className="flex flex-col gap-6">
-          <section className="rounded-3xl bg-white/90 p-6 shadow-xl">
-            <h2 className="mb-4 text-2xl font-extrabold text-brand-700">Elige tu personaje</h2>
-            <div className="grid grid-cols-3 gap-3 sm:grid-cols-6">
-              {avatars.map((avatar) => {
-                const selected = child?.avatarId === avatar.id;
-                return (
-                  <button
-                    key={avatar.id}
-                    type="button"
-                    aria-pressed={selected}
-                    aria-label={avatar.name}
-                    disabled={updateChild.isPending}
-                    onClick={() => updateChild.mutate({ avatarId: avatar.id })}
-                    className={`rounded-2xl p-2 transition ${selected ? 'bg-brand-200 ring-4 ring-brand-500' : 'bg-brand-50 hover:bg-brand-100'}`}
-                  >
-                    <AvatarImage avatarId={avatar.id} className="mx-auto h-20 w-full" />
-                    <span className="text-sm font-bold">{avatar.name}</span>
-                  </button>
-                );
-              })}
-            </div>
-          </section>
-
-          <section className="rounded-3xl bg-white/90 p-6 shadow-xl">
-            <h2 className="mb-4 text-2xl font-extrabold text-brand-700">Mis accesorios</h2>
-            {accessories.length === 0 ? (
-              <p>
-                Aún no tienes accesorios.{' '}
-                <Link to="/pozo" className="font-bold text-brand-700 underline">
-                  Consíguelos en el pozo de los deseos
-                </Link>
-                .
-              </p>
-            ) : (
-              <div className="grid grid-cols-3 gap-3 sm:grid-cols-5">
-                {accessories.map((item) => {
-                  const equipped = isEquipped(item.id);
-                  return (
-                    <button
-                      key={item.id}
-                      type="button"
-                      aria-pressed={equipped}
-                      disabled={equipItem.isPending}
-                      onClick={() => equipItem.mutate({ itemId: item.id, equipped: !equipped })}
-                      className={`flex flex-col items-center rounded-2xl p-2 transition ${equipped ? 'bg-brand-200 ring-4 ring-brand-500' : 'bg-brand-50 hover:bg-brand-100'}`}
-                    >
-                      <span className="text-4xl" aria-hidden>
-                        {item.emoji}
-                      </span>
-                      <span className="text-sm font-bold">{item.name}</span>
-                      <span className="text-xs text-ink/60">{SLOT_LABEL[item.slot]}</span>
-                    </button>
-                  );
-                })}
-              </div>
-            )}
-          </section>
-
-          {(updateChild.error || equipItem.error) && (
-            <ErrorMessage error={updateChild.error ?? equipItem.error} />
-          )}
+      {child && (
+        <div
+          key={child.avatarId}
+          className="pointer-events-none absolute z-10 animate-pop"
+          style={box(592, 205, 270, 465)}
+        >
+          <ChildAvatar child={child} className="size-full" />
         </div>
-      </div>
-    </ChildLayout>
+      )}
+      <p className="sr-only" aria-live="polite">
+        {current ? `Personaje: ${current.name}` : ''}
+      </p>
+
+      {previous && (
+        <ArrowButton
+          direction="left"
+          label={`Personaje anterior: ${previous.name}`}
+          disabled={updateChild.isPending}
+          onClick={() => updateChild.mutate({ avatarId: previous.id })}
+          style={box(440, 355, 142, 146)}
+        />
+      )}
+      {next && (
+        <ArrowButton
+          direction="right"
+          label={`Siguiente personaje: ${next.name}`}
+          disabled={updateChild.isPending}
+          onClick={() => updateChild.mutate({ avatarId: next.id })}
+          style={box(870, 355, 142, 146)}
+        />
+      )}
+
+      {/* Accesorios comprados en el pozo (no están en el Figma): margen derecho. */}
+      <aside
+        aria-label="Mis accesorios"
+        className="absolute z-20 flex flex-col items-center gap-[0.6em] overflow-y-auto"
+        style={{ ...box(1288, 90, 140, 540), fontSize: `max(${dp(16)}, 12px)` }}
+      >
+        {accessories.length === 0 ? (
+          <Link
+            to="/pozo"
+            className="rounded-2xl bg-white/85 p-[0.6em] text-center font-semibold text-ink shadow"
+          >
+            Consigue accesorios en el pozo 🪣
+          </Link>
+        ) : (
+          accessories.map((item) => {
+            const equipped = isEquipped(item.id);
+            return (
+              <button
+                key={item.id}
+                type="button"
+                aria-pressed={equipped}
+                aria-label={`${equipped ? 'Quitar' : 'Ponerme'} ${item.name}`}
+                disabled={equipItem.isPending}
+                onClick={() => equipItem.mutate({ itemId: item.id, equipped: !equipped })}
+                className={`grid aspect-square w-[70%] place-items-center rounded-2xl shadow transition ${equipped ? 'bg-white ring-4 ring-brand-600' : 'bg-white/70 hover:bg-white'}`}
+                style={{ fontSize: dp(44) }}
+              >
+                <span aria-hidden>{item.emoji}</span>
+              </button>
+            );
+          })
+        )}
+      </aside>
+
+      {(updateChild.error || equipItem.error) && (
+        <div className="absolute inset-x-0 bottom-[12%] z-30">
+          <ErrorMessage error={updateChild.error ?? equipItem.error} />
+        </div>
+      )}
+    </Stage>
+  );
+}
+
+interface ArrowButtonProps {
+  direction: 'left' | 'right';
+  label: string;
+  disabled: boolean;
+  onClick: () => void;
+  style: CSSProperties;
+}
+
+/** Flecha negra con contorno desplazado, como en el Figma. */
+function ArrowButton({ direction, label, disabled, onClick, style }: ArrowButtonProps) {
+  return (
+    <button
+      type="button"
+      aria-label={label}
+      disabled={disabled}
+      onClick={onClick}
+      className="absolute z-20 transition hover:scale-110 active:scale-95 disabled:opacity-50"
+      style={style}
+    >
+      <svg
+        viewBox="0 0 142 146"
+        className={`size-full drop-shadow ${direction === 'right' ? '-scale-x-100' : ''}`}
+        aria-hidden
+      >
+        <path
+          d="M6 73 136 3 92 73l44 70Z"
+          fill="none"
+          stroke="#111"
+          strokeWidth="4"
+          strokeLinejoin="round"
+        />
+        <path d="M24 73 132 14 96 73l36 59Z" fill="#000" />
+      </svg>
+    </button>
   );
 }

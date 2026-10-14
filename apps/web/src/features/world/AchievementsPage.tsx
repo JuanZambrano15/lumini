@@ -15,7 +15,7 @@ export function AchievementsPage() {
         {error && <ErrorMessage error={error} onRetry={() => void refetch()} />}
         {data && (
           <>
-            <p className="text-center font-display text-5xl font-extrabold text-brand-700">
+            <p className="text-center font-display text-5xl font-bold text-brand-700">
               ⭐ {data.balance}
             </p>
             <p className="mb-6 text-center text-ink/70">estrellas para lanzar al pozo</p>
@@ -32,7 +32,7 @@ export function AchievementsPage() {
                       <p className="text-sm text-ink/60">{formatDate(movement.createdAt)}</p>
                     </div>
                     <span
-                      className={`font-display text-xl font-extrabold ${movement.amount > 0 ? 'text-green-600' : 'text-red-500'}`}
+                      className={`font-display text-xl font-bold ${movement.amount > 0 ? 'text-green-600' : 'text-red-500'}`}
                     >
                       {movement.amount > 0 ? '+' : ''}
                       {movement.amount} ⭐

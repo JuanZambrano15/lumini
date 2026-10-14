@@ -45,13 +45,13 @@ export function LoginPage() {
             {error}
           </p>
         )}
-        <Button type="submit" loading={submitting}>
+        <Button type="submit" variant="pill" loading={submitting} className="mx-auto mt-2">
           Entrar
         </Button>
       </form>
       <p className="mt-6 text-center text-sm">
         ¿No tienes cuenta?{' '}
-        <Link to="/registro" className="font-bold text-brand-700 underline">
+        <Link to="/registro" className="font-semibold text-brand-700 underline">
           Regístrate
         </Link>
       </p>

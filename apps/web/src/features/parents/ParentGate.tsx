@@ -49,9 +49,9 @@ export function ParentGate() {
   return (
     <form
       onSubmit={(event) => void handleSubmit(event)}
-      className="mx-auto flex max-w-sm animate-pop flex-col gap-4 rounded-3xl bg-white p-6 shadow-xl"
+      className="mx-auto flex max-w-sm animate-pop flex-col gap-4 rounded-[36px] bg-white p-6 shadow-[0_12px_40px_rgba(61,36,112,0.18)] sm:p-8"
     >
-      <h2 className="text-center text-2xl font-extrabold text-brand-700">
+      <h2 className="text-center text-2xl font-bold text-brand-700">
         {isSetup ? 'Crea tu PIN de padres' : 'Ingresa tu PIN de padres'}
       </h2>
       <p className="text-center text-sm text-ink/70">
