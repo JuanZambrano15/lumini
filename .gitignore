@@ -26,3 +26,4 @@ apps/web/ios/
 .idea/
 .vscode/*
 !.vscode/extensions.json
+*.patch
